@@ -1,0 +1,11 @@
+pandas
+openpyxl
+matplotlib
+numpy
+scipy
+seaborn
+ipykernel
+scikit-learn
+pyarrow
+fastparquet
+streamlit

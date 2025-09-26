@@ -5,9 +5,11 @@ from matplotlib import pyplot as plt
 import seaborn as sns
 from datetime import datetime, timedelta
 import os
+from typing import Tuple    # For python3.8
 
 path_parquet = './data/raw/Lecturas_Eneero_2025'
 path_tables = './data/raw/'
+path_processed = './data/processed'
 
 
 def get_data(path: 'str') -> pd.DataFrame:
@@ -25,6 +27,7 @@ def get_data(path: 'str') -> pd.DataFrame:
             'LocalTimeSpan': [],
         })
 
+    print("Reading parquet files, this may take a few minuts...")
     for folder in content:
         if folder.endswith(''):
             path_files = os.path.join(path, folder)
@@ -44,8 +47,9 @@ def get_data(path: 'str') -> pd.DataFrame:
     return df
 
 
-def read_tables(path: 'str') -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    """Function to read tables."""
+def read_tables(path: 'str') -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Function to read tables.
+    Tuple[] for python3.8 and tuple[] for python3.9"""
     df_cities = pd.read_csv(os.path.join(
         path, 'dimCities.csv'), sep=',', header=0)
     df_cities = df_cities.rename(columns={'Name': 'CityName'})
@@ -78,10 +82,42 @@ def read_tables(path: 'str') -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, 
     return df_cities, df_devices, df_locations, df_sensors, df_sublocations, df_unidades
 
 
+def merge_DataFrames(path_processed, df, df_cities, df_devices, df_locations,
+                     df_sensors, df_sublocations, df_unidades) -> None:
+    """Function to merge DataFrames."""
+    df_sensors = df_sensors[['SensorId', 'SensorTyId',
+                             'DeviceId', 'SensorName', 'SensorActive']]
+    df_unidades = df_unidades[['SensorTyId',
+                               'MeasureName', 'UnitName', 'UnitAbbreviation']]
+    df_devices = df_devices[['DeviceId', 'SubLocationId', 'DeviceName']]
+
+    df2 = df_sensors.merge(df_unidades, on='SensorTyId', how='left')
+    sensor_device_unit = df2.merge(df_devices, on='DeviceId', how='left')
+
+    df3 = df_locations.merge(df_cities, on='CityId', how='left')
+    location_subloc_city = df3.merge(
+        df_sublocations, on='LocationId', how='left')
+
+    print("Saving tables...")
+    # Save DataFrames
+    file_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    df_name = f'factLecturas_{file_date}.csv'
+
+    df.to_csv(os.path.join(path_processed, df_name), index=False)
+
+    sensor_device_unit.to_csv(os.path.join(
+        path_processed, 'sensor_device_unit.csv'), index=False)
+
+    location_subloc_city.to_csv(os.path.join(
+        path_processed, 'location_subloc_city.csv'), index=False)
+
+
 def main():
     df = get_data(path_parquet)
     df_cities, df_devices, df_locations, df_sensors, df_sublocations, df_unidades = read_tables(
         path_tables)
+    merge_DataFrames(path_processed, df, df_cities, df_devices, df_locations,
+                     df_sensors, df_sublocations, df_unidades)
 
 
 # Run main function

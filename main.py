@@ -1,3 +1,7 @@
+'''This script reads some 'parquet' files to obtain the dataset to train 40 machine learning models for time series.
+Prophet model is used for multiple time series and this model trains every time series separatly.
+
+The complete data analysis is shown in the Jupyter Notebooks "eda.ipynb" and "ml_model.ipynb" in folder "notebooks".'''
 
 import pandas as pd
 import numpy as np

@@ -6,6 +6,8 @@ The Machine Learning regression problem is addressed for multiple Time Series, i
 ## Details
 -In folder "notebooks" are the following Jupyter Notebooks:
 
+* "ml_time_series.ipynb": This is a basic example of how to implement machine learning models for time series. This document is not related to the rest of this repository, but it is a good example to get started with time series analysis.
+
 * "eda.ipynb": Shows how to read the 'parquet' files to obtain the dataset to train the models. The exploratory data analysis is also shown.
 
 * "ml_model.ipynb": Shows how to preprocess the data and how to train 'Prophet' machine learning model to perform forecast for the multiple time series. The metric 'MAE' (mean absolute error) is used to validate the effectiveness of the models. The plots of the time predictions are saved as pictures in folder "data/processed/prophet_forecasts".
